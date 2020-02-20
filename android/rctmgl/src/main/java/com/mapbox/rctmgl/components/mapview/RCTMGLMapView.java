@@ -214,7 +214,12 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
         if (feature != null) {
             if (mQueuedFeatures == null) {
                 feature.addToMap(this);
-                mFeatures.add(childPosition, feature);
+                // FIX: 462
+                if (childPosition < mFeatures.size()) {
+                    mFeatures.add(childPosition, feature);
+                } else {
+                    mFeatures.add(mFeatures.size(), feature);
+                }
             } else {
                 mQueuedFeatures.add(childPosition, feature);
             }
@@ -1062,7 +1067,7 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
         LatLng latLng = new LatLng(position.target.getLatitude(), position.target.getLongitude());
 
         WritableMap properties = new WritableNativeMap();
-        
+
         properties.putDouble("zoomLevel", position.zoom);
         properties.putDouble("heading", position.bearing);
         properties.putDouble("pitch", position.tilt);
@@ -1079,7 +1084,7 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
     public void sendRegionChangeEvent(boolean isAnimated) {
         IEvent event = new MapChangeEvent(this, EventTypes.REGION_DID_CHANGE,
                 makeRegionPayload(new Boolean(isAnimated)));
-        
+
                 mManager.handleEvent(event);
         mCameraChangeTracker.setReason(CameraChangeTracker.EMPTY);
     }
